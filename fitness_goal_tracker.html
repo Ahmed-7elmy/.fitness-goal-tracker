@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Goal Tracker</title>
+  <style>
+    body {
+      background-color: #F5FFFA;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 400px;
+      margin: 0 auto 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    label {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+    input, select, button {
+      padding: 12px;
+      font-size: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #FF6347;
+    }
+    select {
+      width: 100%;
+    }
+    button {
+      background-color: #FF6347;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      min-height: 48px;
+    }
+    button:hover {
+      background-color: #e55339;
+      transform: scale(1.02);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    ul {
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 0;
+      list-style: none;
+    }
+    .goal-card {
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+      transition: transform 0.2s;
+    }
+    .goal-card:hover {
+      transform: translateY(-2px);
+    }
+    .goal-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .goal-card progress {
+      flex-grow: 1;
+      height: 20px;
+      border-radius: 10px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .goal-card progress::-webkit-progress-bar {
+      background-color: #f0f0f0;
+      border-radius: 10px;
+    }
+    .goal-card progress::-webkit-progress-value {
+      background-color: #32CD32;
+      border-radius: 10px;
+      transition: width 0.5s ease-in-out;
+    }
+    .goal-card progress::-moz-progress-bar {
+      background-color: #32CD32;
+      border-radius: 10px;
+    }
+    .percentage {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+    .update-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .update-form input {
+      flex-grow: 1;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    .update-form button {
+      padding: 8px 15px;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .delete-btn {
+      background-color: #ff4444;
+      border-radius: 6px;
+    }
+    .delete-btn:hover {
+      background-color: #cc3333;
+    }
+    .completed {
+      color: #32CD32;
+      font-weight: bold;
+    }
+    .motivational-text {
+      font-size: 14px;
+      color: #555;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      .input-group, ul {
+        width: 100%;
+        max-width: 100%;
+      }
+      .input-group {
+        padding: 15px;
+      }
+      .goal-card {
+        padding: 12px;
+      }
+      .update-form {
+        flex-direction: column;
+      }
+      .goal-card progress {
+        height: 16px;
+      }
+      .percentage {
+        font-size: 16px;
+      }
+      button {
+        font-size: 16px;
+        padding: 10px;
+        min-height: 44px;
+      }
+      .update-form button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Fitness Goal Tracker</h1>
+  <div class="input-group">
+    <label for="goalType">Goal Type:</label>
+    <select id="goalType" required>
+      <option value="">Select a goal type</option>
+      <option value="Steps">Steps</option>
+      <option value="Calories">Calories burned</option>
+      <option value="Exercise">Exercise minutes</option>
+      <option value="Water">Water intake (ml)</option>
+    </select>
+    
+    <label for="goalValue">Target Value:</label>
+    <input type="number" id="goalValue" min="1" required placeholder="e.g., 10000">
+    
+    <button id="addGoalButton">Add Goal</button>
+  </div>
+  <ul id="goalList"></ul>
+  <script>
+    const goalList = document.getElementById('goalList');
+    let goals = JSON.parse(localStorage.getItem('goals') || '[]');
+
+    function saveGoals() {
+      localStorage.setItem('goals', JSON.stringify(goals));
+    }
+
+    function renderGoals() {
+      goalList.innerHTML = '';
+      if (goals.length === 0) {
+        goalList.innerHTML = '<p style="text-align: center; color: #555;">No goals added yet. Start by adding your first goal above!</p>';
+        return;
+      }
+
+      goals.forEach((goal, index) => {
+        const li = document.createElement('li');
+        li.className = 'goal-card';
+
+        const title = document.createElement('div');
+        title.className = 'goal-title';
+        title.textContent = `${goal.type}: ${goal.progress} / ${goal.target}`;
+
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'progress-container';
+
+        const progress = document.createElement('progress');
+        progress.max = goal.target;
+        progress.value = goal.progress;
+
+        const percentage = document.createElement('div');
+        const percentComplete = Math.round((goal.progress / goal.target) * 100);
+        percentage.className = 'percentage';
+        percentage.textContent = `${percentComplete}%`;
+
+        const motivationalText = document.createElement('div');
+        motivationalText.className = 'motivational-text';
+        if (percentComplete >= 100) {
+          percentage.classList.add('completed');
+          percentage.textContent += ' 🏆';
+          motivationalText.textContent = 'Amazing work! Goal achieved!';
+        } else if (percentComplete >= 75) {
+          percentage.textContent += ' 🚀';
+          motivationalText.textContent = 'So close! Keep pushing!';
+        } else if (percentComplete >= 50) {
+          percentage.textContent += ' 💪';
+          motivationalText.textContent = 'Halfway there! Stay strong!';
+        } else {
+          motivationalText.textContent = 'Every step counts! Keep going!';
+        }
+
+        progressContainer.appendChild(progress);
+        progressContainer.appendChild(percentage);
+
+        const updateForm = document.createElement('div');
+        updateForm.className = 'update-form';
+        updateForm.innerHTML = `
+          <input type="number" class="progress-input" min="0" max="${goal.target}" placeholder="Add progress" value="">
+          <button class="update-btn">Update</button>
+        `;
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => {
+          goals.splice(index, 1);
+          saveGoals();
+          renderGoals();
+        });
+        actions.appendChild(deleteBtn);
+
+        updateForm.querySelector('.update-btn').addEventListener('click', () => {
+          const input = updateForm.querySelector('.progress-input');
+          const value = parseInt(input.value);
+          if (!isNaN(value) && value >= 0) {
+            goals[index].progress = Math.min(goal.target, goal.progress + value);
+            saveGoals();
+            renderGoals();
+          }
+          input.value = '';
+        });
+
+        li.appendChild(title);
+        li.appendChild(progressContainer);
+        li.appendChild(motivationalText);
+        li.appendChild(updateForm);
+        li.appendChild(actions);
+        goalList.appendChild(li);
+      });
+    }
+
+    document.getElementById('addGoalButton').addEventListener('click', () => {
+      const type = document.getElementById('goalType').value.trim();
+      const value = parseInt(document.getElementById('goalValue').value);
+
+      if (!type) {
+        alert('Please select a goal type!');
+        return;
+      }
+
+      if (isNaN(value) || value <= 0) {
+        alert('Please enter a valid positive number for the target!');
+        return;
+      }
+
+      goals.push({ type: type, target: value, progress: 0, createdAt: new Date().toISOString() });
+      saveGoals();
+      renderGoals();
+      
+      document.getElementById('goalType').value = '';
+      document.getElementById('goalValue').value = '';
+    });
+
+    renderGoals();
+  </script>
+</body>
+</html>
